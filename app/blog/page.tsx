@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import { supabase, BlogPost } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 export default function BlogPage() {
   const pathname = usePathname();
   const [posts, setPosts] = useState<BlogPost[]>([]);

@@ -29,6 +29,8 @@ type NewsItem = {
   publishedAt: string;
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function Dashboard() {
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('kline');
