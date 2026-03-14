@@ -134,32 +134,41 @@ export async function getFundingRate(instId: string = 'BTC-USDT-SWAP'): Promise<
 }
 
 export async function getLiquidationMap(instId: string = 'BTC-USDT'): Promise<LiquidationItem[]> {
-  // 爆仓订单接口通常需要 SWAP 类型的 instId
-  const swapInstId = instId.includes('-SWAP') ? instId : `${instId.split('-')[0]}-${instId.split('-')[1]}-SWAP`;
+  const baseAsset = instId.split('-')[0];
   
   try {
+    // 1. 尝试直接获取特定合约的爆仓单 (增加 validateStatus 以防 400 抛出异常)
+    const quoteAsset = instId.split('-')[1] || 'USDT';
+    const swapInstId = `${baseAsset}-${quoteAsset}-SWAP`;
+    
     const response = await okxClient.get('/api/v5/public/liquidation-orders', {
       params: {
         instType: 'SWAP',
         instId: swapInstId,
       },
+      validateStatus: () => true, // 允许处理 400 等错误状态码而不抛出
     });
 
-    if (response.data.code !== '0') {
-      // 如果报错内容包含“不存在”或“非法参数”，尝试只传 instType 获取最近所有爆仓
-      if (response.data.code === '51001' || response.data.code === '51015') {
-        const fallbackResponse = await okxClient.get('/api/v5/public/liquidation-orders', {
-          params: { instType: 'SWAP' },
-        });
-        if (fallbackResponse.data.code === '0') {
-          return (fallbackResponse.data.data as LiquidationItem[]).filter((item) => item.instId === swapInstId);
-        }
-      }
-      return [];
+    if (response.data.code === '0' && response.data.data && response.data.data.length > 0) {
+      return response.data.data as LiquidationItem[];
     }
 
-    return response.data.data as LiquidationItem[];
-  } catch {
+    // 2. 降级方案：获取所有 SWAP 的最近爆仓并过滤
+    // 这样做更稳健，因为不需要猜测确切的合约名称 (如币本位 vs U本位)
+    const fallbackResponse = await okxClient.get('/api/v5/public/liquidation-orders', {
+      params: { instType: 'SWAP' },
+      validateStatus: () => true,
+    });
+    
+    if (fallbackResponse.data.code === '0' && fallbackResponse.data.data) {
+      const allLiqs = fallbackResponse.data.data as LiquidationItem[];
+      return allLiqs.filter(item => item.instId.startsWith(baseAsset));
+    }
+
+    return [];
+  } catch (error) {
+    // 只有在网络错误或代码崩溃时才记录
+    console.debug('Liquidation API quiet failure:', error);
     return [];
   }
 }

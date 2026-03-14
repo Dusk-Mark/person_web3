@@ -35,34 +35,34 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 px-8 py-6 flex justify-between items-center backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="flex items-center gap-2">
           <Zap className="text-cyan-500 animate-pulse" size={24} />
-          <span className="text-xl font-black tracking-tighter text-white uppercase">Mark 私人终端</span>
+          <span className="text-xl font-black tracking-tighter text-white uppercase">Mark Team 终端</span>
         </div>
         <nav className="hidden md:flex gap-8 text-[10px] uppercase tracking-widest font-bold">
           <a href="#features" className="hover:text-cyan-400 transition-colors">核心规格</a>
-          <a href="#about" className="hover:text-cyan-400 transition-colors">安全节点</a>
-          <Link href="/dashboard" className="px-4 py-1 bg-cyan-500 text-black hover:bg-cyan-400 transition-all">启动私人终端</Link>
+          <a href="#about" className="hover:text-cyan-400 transition-colors">关于团队</a>
+          <Link href="/dashboard" className="px-4 py-1 bg-cyan-500 text-black hover:bg-cyan-400 transition-all">启动终端控制台</Link>
         </nav>
       </header>
 
       {/* 英雄板块 */}
       <section className="relative pt-40 pb-20 px-8 flex flex-col items-center text-center">
         <div className="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] uppercase tracking-[0.2em] mb-6 animate-fade-in">
-          Mark 的私人 Web3 数据分析节点
+          由 Mark 团队倾力打造的 Web3 核心分析节点
         </div>
         <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-8 max-w-5xl leading-[0.9] uppercase glitch" data-text="解码加密矩阵">
           解码 <br /> <span className="text-cyan-500">加密矩阵</span>
         </h1>
         <p className="text-gray-500 max-w-2xl text-sm md:text-base leading-relaxed mb-12">
-          专为 Mark 打造的高性能 Web3 监控套件。
-          集成顶级数据源，提供实时 K 线分析与聚合清算热力图。
+          专为精英交易者打造的高性能 Web3 监控套件。
+          由 Mark 团队深度集成顶级数据源，提供实时 K 线分析与聚合清算热力图。
         </p>
         
         <div className="flex flex-col md:flex-row gap-6">
           <Link href="/dashboard" className="group flex items-center gap-3 px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest hover:bg-cyan-400 transition-all">
-            进入私人终端 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            进入控制终端 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </Link>
           <a href="#about" className="px-8 py-4 border border-[#333] font-black uppercase tracking-widest hover:bg-white/5 transition-all">
-            核心规格
+            技术规格
           </a>
         </div>
       </section>
@@ -128,13 +128,13 @@ export default function LandingPage() {
       {/* 关于板块 */}
       <section id="about" className="px-8 py-32">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-8">系统规格说明</h2>
+          <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-8">Mark Team 系统规格</h2>
           <div className="space-y-6 text-gray-500 text-sm leading-relaxed">
             <p>
-              <span className="text-cyan-500 font-bold">Mark 的私人终端</span> 是一个基于 Next.js 的专业研究项目，旨在探索 Web3 市场动态与个人化 UI 设计的结合点。
+              <span className="text-cyan-500 font-bold">Mark Team 终端</span> 是由 Mark 团队倾力打造的专业研究项目，旨在探索 Web3 市场动态与未来主义 UI 设计的结合点。
             </p>
             <p>
-              每一字节数据都直接从全球顶级交易所流式传输，提供纯净的数字资产景观视角。我们的使命是为 Mark 提供高保真视觉界面，穿透传统金融的噪音。
+              每一字节数据都经过团队优化的专用通道流式传输，提供纯净的数字资产景观视角。我们的使命是为精英交易者提供高保真视觉界面，穿透传统金融的噪音。
             </p>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function LandingPage() {
       {/* 页脚 */}
       <footer className="px-8 py-12 border-t border-[#1A1A1A] text-center">
         <div className="text-[10px] text-gray-600 uppercase tracking-[0.4em]">
-          由 Trae 提供技术支持 // 为反抗者设计
+          由 Mark 团队开发 // 为反抗者设计
         </div>
       </footer>
 

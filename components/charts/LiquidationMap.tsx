@@ -20,7 +20,7 @@ export default function LiquidationMap({ instId = 'BTC-USDT', className }: Liqui
         const liquidations = await getLiquidationMap(instId);
         setData(liquidations);
       } catch (error) {
-        console.error('获取清算数据失败:', error);
+        // 错误已经在 lib/okx.ts 中处理并静默，此处仅做兜底
       } finally {
         setLoading(false);
       }
@@ -34,12 +34,16 @@ export default function LiquidationMap({ instId = 'BTC-USDT', className }: Liqui
   const bins = useMemo(() => {
     if (!data || !data.length) return [];
 
+    // 计算价格步长 (根据价格量级自动调整)
+    const avgPrice = data.reduce((sum, item) => sum + parseFloat(item.bkPx), 0) / data.length;
+    const step = avgPrice > 1000 ? 50 : avgPrice > 100 ? 5 : 0.5;
+
     // 按价格和方向分组
     const longLiquidations: Record<number, number> = {};
     const shortLiquidations: Record<number, number> = {};
 
     data.forEach((item) => {
-      const price = Math.round(parseFloat(item.bkPx) / 100) * 100; // 以 $100 为步长
+      const price = Math.round(parseFloat(item.bkPx) / step) * step;
       const sz = parseFloat(item.sz);
       if (item.side === 'buy') { // buy 表示空单被强平（被迫买入）
         shortLiquidations[price] = (shortLiquidations[price] || 0) + sz;
@@ -103,7 +107,7 @@ export default function LiquidationMap({ instId = 'BTC-USDT', className }: Liqui
                 </div>
               </div>
               <div className="w-20 text-[10px] text-gray-400 font-mono text-right">
-                {(bin.long + bin.short).toFixed(2)} BTC
+                {(bin.long + bin.short).toLocaleString(undefined, { maximumFractionDigits: 2 })} {instId.split('-')[0]}
               </div>
             </div>
           ))}
