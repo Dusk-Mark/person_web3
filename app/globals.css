@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+@theme {
+  --color-magenta: #FF00FF;
+  --color-matrix: #00FF00;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #050505;
+  --foreground: #e0e0e0;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Cyberpunk Grid Pattern */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(34, 211, 238, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Glitch Effect for text */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -2px 0 #ff00ff;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: -2px 0 #00ffff;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(31px, 9999px, 94px, 0); }
+  20% { clip: rect(62px, 9999px, 42px, 0); }
+  40% { clip: rect(16px, 9999px, 78px, 0); }
+  60% { clip: rect(58px, 9999px, 43px, 0); }
+  80% { clip: rect(87px, 9999px, 5px, 0); }
+  100% { clip: rect(23px, 9999px, 98px, 0); }
+}
+
+@keyframes glitch-anim2 {
+  0% { clip: rect(65px, 9999px, 100px, 0); }
+  20% { clip: rect(80px, 9999px, 20px, 0); }
+  40% { clip: rect(10px, 9999px, 90px, 0); }
+  60% { clip: rect(40px, 9999px, 60px, 0); }
+  80% { clip: rect(50px, 9999px, 30px, 0); }
+  100% { clip: rect(15px, 9999px, 85px, 0); }
 }
