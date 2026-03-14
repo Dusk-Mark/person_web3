@@ -37,9 +37,10 @@ export default function LandingPage() {
           <Zap className="text-cyan-500 animate-pulse" size={24} />
           <span className="text-xl font-black tracking-tighter text-white uppercase">Mark Team 终端</span>
         </div>
-        <nav className="hidden md:flex gap-8 text-[10px] uppercase tracking-widest font-bold">
+        <nav className="hidden md:flex gap-8 text-[10px] uppercase tracking-widest font-bold items-center">
           <a href="#features" className="hover:text-cyan-400 transition-colors">核心规格</a>
           <a href="#about" className="hover:text-cyan-400 transition-colors">关于团队</a>
+          <Link href="/blog" className="hover:text-cyan-400 transition-colors">研究报告</Link>
           <Link href="/dashboard" className="px-4 py-1 bg-cyan-500 text-black hover:bg-cyan-400 transition-all">启动终端控制台</Link>
         </nav>
       </header>
@@ -60,6 +61,9 @@ export default function LandingPage() {
         <div className="flex flex-col md:flex-row gap-6">
           <Link href="/dashboard" className="group flex items-center gap-3 px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest hover:bg-cyan-400 transition-all">
             进入控制终端 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/blog" className="px-8 py-4 border border-cyan-500/30 text-cyan-400 font-black uppercase tracking-widest hover:bg-cyan-500/5 transition-all">
+            查阅研究报告
           </Link>
           <a href="#about" className="px-8 py-4 border border-[#333] font-black uppercase tracking-widest hover:bg-white/5 transition-all">
             技术规格

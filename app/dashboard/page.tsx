@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import AdvancedChart from '@/components/charts/AdvancedChart';
 import LiquidationMap from '@/components/charts/LiquidationMap';
-import { Activity, LayoutDashboard, Map, Zap, Settings, Bell, ChevronDown, ExternalLink } from 'lucide-react';
+import { Activity, LayoutDashboard, Map, Zap, Settings, Bell, ChevronDown, ExternalLink, FileText } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { getTickers, TickerData } from '@/lib/okx';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const TIMEFRAMES = [
   { label: '1分', value: '1m' },
@@ -29,6 +30,7 @@ type NewsItem = {
 };
 
 export default function Dashboard() {
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('kline');
   const [selectedAsset, setSelectedAsset] = useState('BTC-USDT');
   const [selectedTimeframe, setSelectedTimeframe] = useState('1D');
@@ -103,17 +105,24 @@ export default function Dashboard() {
           <button 
             onClick={() => setActiveTab('kline')}
             title="K线图表"
-            className={cn("p-2 transition-all duration-300", activeTab === 'kline' ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" : "text-gray-600 hover:text-gray-400")}
+            className={cn("p-2 transition-all duration-300", activeTab === 'kline' && pathname === '/dashboard' ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" : "text-gray-600 hover:text-gray-400")}
           >
             <Activity size={24} />
           </button>
           <button 
             onClick={() => setActiveTab('liquidation')}
             title="清算地图"
-            className={cn("p-2 transition-all duration-300", activeTab === 'liquidation' ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" : "text-gray-600 hover:text-gray-400")}
+            className={cn("p-2 transition-all duration-300", activeTab === 'liquidation' && pathname === '/dashboard' ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" : "text-gray-600 hover:text-gray-400")}
           >
             <Map size={24} />
           </button>
+          <Link 
+            href="/blog"
+            title="研究报告"
+            className={cn("p-2 transition-all duration-300", pathname === '/blog' ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" : "text-gray-600 hover:text-gray-400")}
+          >
+            <FileText size={24} />
+          </Link>
           <button title="仪表盘" className="p-2 text-gray-600 hover:text-gray-400 transition-colors">
             <LayoutDashboard size={24} />
           </button>
