@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import AdvancedChart from '@/components/charts/AdvancedChart';
 import LiquidationMap from '@/components/charts/LiquidationMap';
-import { Activity, LayoutDashboard, Map, Zap, Settings, Bell, ChevronDown, ExternalLink, FileText } from 'lucide-react';
+import { Activity, LayoutDashboard, Map, Zap, Settings, Bell, ChevronDown, ExternalLink, FileText, Calculator } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { getTickers, TickerData } from '@/lib/okx';
 import Link from 'next/link';
@@ -103,8 +103,8 @@ export default function Dashboard() {
             <Zap size={22} />
           </Link>
           <div className="text-[11px] text-gray-400 uppercase tracking-widest">Mark 终端</div>
-          <Link href="/blog" className="text-gray-400 hover:text-cyan-400 transition-colors">
-            <FileText size={20} />
+          <Link href="/calculator" className="text-gray-400 hover:text-cyan-400 transition-colors">
+            <Calculator size={20} />
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -149,6 +149,13 @@ export default function Dashboard() {
           >
             <Map size={24} />
           </button>
+          <Link 
+            href="/calculator"
+            title="合约计算器"
+            className={cn("p-2 transition-all duration-300", pathname === '/calculator' ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" : "text-gray-600 hover:text-gray-400")}
+          >
+            <Calculator size={24} />
+          </Link>
           <Link 
             href="/blog"
             title="研究报告"
@@ -303,7 +310,7 @@ export default function Dashboard() {
 
           {/* 侧边栏部分 */}
           <div className="col-span-12 lg:col-span-3 space-y-6">
-            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-6 h-full relative group overflow-hidden">
+            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-6 relative group overflow-hidden">
               {/* 背景装饰 */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 blur-[80px] -mr-16 -mt-16 pointer-events-none" />
               
@@ -380,12 +387,29 @@ export default function Dashboard() {
                 </a>
               </div>
             </div>
+            <Link
+              href="/calculator"
+              className="block border border-[#1A1A1A] bg-[#0A0A0A] p-4 md:p-6 relative overflow-hidden hover:border-cyan-500/40 transition-colors"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 blur-[70px] -mr-8 -mt-8 pointer-events-none" />
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-white uppercase tracking-tighter flex items-center gap-2">
+                  <Calculator size={14} className="text-cyan-500" />
+                  合约计算器
+                </h2>
+                <span className="text-[9px] text-cyan-500 uppercase">USDT</span>
+              </div>
+              <p className="text-[11px] text-gray-500 leading-relaxed mb-4">
+                独立页面支持全仓、仓位占比、杠杆、入场、止盈止损一键估算，快速看到预计盈亏和余额变化。
+              </p>
+              <div className="text-[10px] text-cyan-400 uppercase tracking-widest">进入计算器 →</div>
+            </Link>
           </div>
         </div>
       </section>
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[#1A1A1A] bg-[#0A0A0A]/95 backdrop-blur-md px-2 py-2">
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-5 gap-1">
           <button
             onClick={() => setActiveTab('kline')}
             className={cn("flex flex-col items-center gap-1 py-1 text-[10px] uppercase", activeTab === 'kline' ? "text-cyan-400" : "text-gray-500")}
@@ -403,6 +427,10 @@ export default function Dashboard() {
           <Link href="/blog" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
             <FileText size={16} />
             博客
+          </Link>
+          <Link href="/calculator" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
+            <Calculator size={16} />
+            计算
           </Link>
           <Link href="/" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
             <Zap size={16} />

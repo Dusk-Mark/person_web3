@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Zap, Activity, Shield, Cpu, ArrowRight, BarChart3, Globe } from 'lucide-react';
+import { Zap, Activity, Shield, Cpu, ArrowRight, Globe, Calculator } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { getTickers, TickerData } from '@/lib/okx';
 import Link from 'next/link';
@@ -40,11 +40,13 @@ export default function LandingPage() {
         <nav className="hidden md:flex gap-8 text-[10px] uppercase tracking-widest font-bold items-center">
           <a href="#features" className="hover:text-cyan-400 transition-colors">核心规格</a>
           <a href="#about" className="hover:text-cyan-400 transition-colors">关于团队</a>
+          <Link href="/calculator" className="hover:text-cyan-400 transition-colors">合约计算器</Link>
           <Link href="/blog" className="hover:text-cyan-400 transition-colors">研究报告</Link>
           <Link href="/dashboard" className="px-4 py-1 bg-cyan-500 text-black hover:bg-cyan-400 transition-all">启动终端控制台</Link>
         </nav>
         <div className="md:hidden flex items-center gap-2">
           <Link href="/dashboard" className="px-3 py-1 text-[10px] border border-cyan-500/40 text-cyan-400 uppercase tracking-widest">终端</Link>
+          <Link href="/calculator" className="px-3 py-1 text-[10px] border border-cyan-500/20 text-cyan-400 uppercase tracking-widest">计算</Link>
           <Link href="/blog" className="px-3 py-1 text-[10px] border border-[#333] text-gray-300 uppercase tracking-widest">博客</Link>
         </div>
       </header>
@@ -65,6 +67,9 @@ export default function LandingPage() {
         <div className="flex flex-col md:flex-row gap-3 md:gap-6 w-full md:w-auto">
           <Link href="/dashboard" className="group flex items-center gap-3 px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest hover:bg-cyan-400 transition-all">
             进入控制终端 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/calculator" className="px-8 py-4 border border-cyan-500/30 text-cyan-400 font-black uppercase tracking-widest hover:bg-cyan-500/5 transition-all">
+            合约收益试算
           </Link>
           <Link href="/blog" className="px-8 py-4 border border-cyan-500/30 text-cyan-400 font-black uppercase tracking-widest hover:bg-cyan-500/5 transition-all">
             查阅研究报告
@@ -121,7 +126,7 @@ export default function LandingPage() {
               { icon: Cpu, title: '私人定制 UI', desc: '专为 Mark 优化的视觉风格，针对高密度信息展示和深色模式进行了极致优化。' },
               { icon: Zap, title: '闪电刷新', desc: '亚秒级数据自动同步，贯穿终端所有模块，确保决策的实时性。' },
               { icon: Shield, title: '数据主权', desc: '本地化配置与私人密钥安全隔离，确保您的监控环境纯净且无干扰。' },
-              { icon: BarChart3, title: '聚合热力图', desc: '深度追踪清算事件与流动性分布，在数字丛林中预判大宗波动。' },
+              { icon: Calculator, title: '合约盈亏计算', desc: '独立全仓计算器支持仓位占比、杠杆、入场与止盈止损预估，结果统一以 USDT 输出。' },
             ].map((feature, i) => (
               <div key={i} className="p-8 border border-[#1A1A1A] bg-[#080808] hover:border-cyan-500/30 transition-all group">
                 <feature.icon className="text-cyan-500 mb-6 group-hover:scale-110 transition-transform" size={32} />

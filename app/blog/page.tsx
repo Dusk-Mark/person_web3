@@ -7,7 +7,7 @@ import {
   Zap, Activity, Map, LayoutDashboard, Settings, Bell,
   FileText, Plus, Search, Calendar, Tag, ChevronRight,
   ArrowLeft, Send, Loader2, Trash2, LogIn, LogOut, Key,
-  Filter, Copy, Clock, Eye, PencilLine, List, Heading2, Link2, Code2
+  Filter, Copy, Clock, Eye, PencilLine, List, Heading2, Link2, Code2, Calculator
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase, BlogPost } from '@/lib/supabase';
@@ -303,6 +303,13 @@ export default function BlogPage() {
             className="p-2 transition-all duration-300 text-gray-600 hover:text-gray-400"
           >
             <Map size={24} />
+          </Link>
+          <Link
+            href="/calculator"
+            title="合约计算器"
+            className={cn("p-2 transition-all duration-300", pathname === '/calculator' ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" : "text-gray-600 hover:text-gray-400")}
+          >
+            <Calculator size={24} />
           </Link>
           <Link
             href="/blog"
@@ -852,7 +859,7 @@ export default function BlogPage() {
       )}
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[#1A1A1A] bg-[#0A0A0A]/95 backdrop-blur-md px-2 py-2">
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-5 gap-1">
           <Link href="/" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
             <Zap size={16} />
             首页
@@ -860,6 +867,10 @@ export default function BlogPage() {
           <Link href="/dashboard" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
             <Activity size={16} />
             K线
+          </Link>
+          <Link href="/calculator" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
+            <Calculator size={16} />
+            计算
           </Link>
           <Link href="/blog" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-cyan-400">
             <FileText size={16} />
