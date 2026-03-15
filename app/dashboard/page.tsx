@@ -97,8 +97,39 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-[#E0E0E0] font-mono selection:bg-cyan-500/30">
+      <div className="md:hidden sticky top-0 z-40 border-b border-[#1A1A1A] bg-[#0A0A0A]/95 backdrop-blur-md px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <Link href="/" className="text-cyan-500">
+            <Zap size={22} />
+          </Link>
+          <div className="text-[11px] text-gray-400 uppercase tracking-widest">Mark 终端</div>
+          <Link href="/blog" className="text-gray-400 hover:text-cyan-400 transition-colors">
+            <FileText size={20} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setActiveTab('kline')}
+            className={cn(
+              "py-2 text-[11px] border uppercase tracking-widest transition-colors",
+              activeTab === 'kline' ? "border-cyan-500/50 text-cyan-400 bg-cyan-500/10" : "border-[#222] text-gray-500"
+            )}
+          >
+            K线图
+          </button>
+          <button
+            onClick={() => setActiveTab('liquidation')}
+            className={cn(
+              "py-2 text-[11px] border uppercase tracking-widest transition-colors",
+              activeTab === 'liquidation' ? "border-cyan-500/50 text-cyan-400 bg-cyan-500/10" : "border-[#222] text-gray-500"
+            )}
+          >
+            清算地图
+          </button>
+        </div>
+      </div>
       {/* 侧边栏 */}
-      <aside className="fixed left-0 top-0 bottom-0 w-16 border-r border-[#1A1A1A] bg-[#0A0A0A] flex flex-col items-center py-8 z-50">
+      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-16 border-r border-[#1A1A1A] bg-[#0A0A0A] flex-col items-center py-8 z-50">
         <Link href="/" className="mb-12 text-cyan-500 animate-pulse">
           <Zap size={32} />
         </Link>
@@ -141,11 +172,11 @@ export default function Dashboard() {
       </aside>
 
       {/* 主内容区 */}
-      <section className="pl-16 p-8">
+      <section className="px-4 pb-24 pt-4 md:pl-16 md:p-8 md:pb-8">
         {/* 页眉 */}
-        <header className="flex justify-between items-end mb-12">
+        <header className="flex flex-col gap-4 md:flex-row md:justify-between md:items-end mb-8 md:mb-12">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-white flex items-center gap-2">
+            <h1 className="text-2xl md:text-4xl font-black tracking-tighter text-white flex items-center gap-2">
               <span className="bg-cyan-500 text-black px-2 py-0.5 uppercase">Mark</span>
               私人 Web3 终端
             </h1>
@@ -171,15 +202,15 @@ export default function Dashboard() {
         <div className="grid grid-cols-12 gap-6">
           {/* 主图表区域 */}
           <div className="col-span-12 lg:col-span-9 space-y-6">
-            <div className="relative border border-[#1A1A1A] bg-[#0A0A0A] p-6 rounded-sm">
+            <div className="relative border border-[#1A1A1A] bg-[#0A0A0A] p-3 md:p-6 rounded-sm">
               {/* 角部装饰 */}
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-500" />
               <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-500" />
               <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-500" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-cyan-500" />
               
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-6">
+              <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center mb-4 md:mb-6">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
                   {/* 资产选择器 */}
                   <div ref={assetMenuRef} className="relative">
                     <button
@@ -211,7 +242,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* 周期选择器 */}
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {TIMEFRAMES.map(tf => (
                       <button 
                         key={tf.value}
@@ -230,29 +261,29 @@ export default function Dashboard() {
 
                   {/* 价格信息 */}
                   {currentTicker && (
-                    <div className="flex items-center gap-4 ml-4">
-                      <div className="text-xl font-black text-white">${formatNumber(parseFloat(currentTicker.last))}</div>
+                    <div className="flex items-center gap-4 md:ml-4">
+                      <div className="text-lg md:text-xl font-black text-white">${formatNumber(parseFloat(currentTicker.last))}</div>
                       <div className={cn("text-[10px]", parseFloat(currentTicker.last) >= parseFloat(currentTicker.open24h) ? "text-green-500" : "text-magenta-500")}>
                         {((parseFloat(currentTicker.last) - parseFloat(currentTicker.open24h)) / parseFloat(currentTicker.open24h) * 100).toFixed(2)}%
                       </div>
                     </div>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="hidden md:flex gap-2">
                   <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-ping" />
                   <span className="text-[10px] text-cyan-500 font-bold uppercase">实时数据流</span>
                 </div>
               </div>
 
               {activeTab === 'kline' ? (
-                <AdvancedChart instId={selectedAsset} interval={selectedTimeframe} className="h-[500px]" />
+                <AdvancedChart instId={selectedAsset} interval={selectedTimeframe} className="h-[360px] md:h-[500px]" />
               ) : (
-                <LiquidationMap instId={selectedAsset} className="h-[500px]" />
+                <LiquidationMap instId={selectedAsset} className="h-[360px] md:h-[500px]" />
               )}
             </div>
 
             {/* 数据统计行 */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {[
                 { label: '24H 最高', value: currentTicker ? `$${formatNumber(parseFloat(currentTicker.high24h))}` : '---', trend: '峰值' },
                 { label: '24H 最低', value: currentTicker ? `$${formatNumber(parseFloat(currentTicker.low24h))}` : '---', trend: '谷值' },
@@ -261,8 +292,8 @@ export default function Dashboard() {
                 <div key={i} className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
                   <div className="text-[10px] text-gray-500 uppercase mb-1">{stat.label}</div>
-                  <div className="flex justify-between items-baseline">
-                    <div className="text-2xl font-black text-white">{stat.value}</div>
+                  <div className="flex justify-between items-baseline gap-3">
+                    <div className="text-xl md:text-2xl font-black text-white break-all">{stat.value}</div>
                     <div className="text-[10px] text-cyan-500">{stat.trend}</div>
                   </div>
                 </div>
@@ -288,20 +319,20 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="space-y-4 min-h-[400px]">
+              <div className="space-y-4 min-h-[260px] md:min-h-[400px]">
                 {newsLoading && news.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-64 space-y-4">
                     <div className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
                     <div className="text-[10px] text-cyan-500 font-mono animate-pulse">正在接入加密数据流...</div>
                   </div>
                 ) : news.length > 0 ? (
-                  news.slice(0, 10).map((item, i) => (
+                  news.slice(0, 8).map((item, i) => (
                     <a
                       key={`${item.link}-${i}`}
                       href={item.link}
                       target="_blank"
                       rel="noreferrer"
-                      className="block group/item relative pl-4 py-2 border-l border-white/5 hover:border-cyan-500/50 transition-all duration-300"
+                      className="block group/item relative pl-3 md:pl-4 py-2 border-l border-white/5 hover:border-cyan-500/50 transition-all duration-300"
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[8px] font-mono text-gray-600">
@@ -352,6 +383,33 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[#1A1A1A] bg-[#0A0A0A]/95 backdrop-blur-md px-2 py-2">
+        <div className="grid grid-cols-4 gap-1">
+          <button
+            onClick={() => setActiveTab('kline')}
+            className={cn("flex flex-col items-center gap-1 py-1 text-[10px] uppercase", activeTab === 'kline' ? "text-cyan-400" : "text-gray-500")}
+          >
+            <Activity size={16} />
+            K线
+          </button>
+          <button
+            onClick={() => setActiveTab('liquidation')}
+            className={cn("flex flex-col items-center gap-1 py-1 text-[10px] uppercase", activeTab === 'liquidation' ? "text-cyan-400" : "text-gray-500")}
+          >
+            <Map size={16} />
+            清算
+          </button>
+          <Link href="/blog" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
+            <FileText size={16} />
+            博客
+          </Link>
+          <Link href="/" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
+            <Zap size={16} />
+            首页
+          </Link>
+        </div>
+      </nav>
 
       {/* 页脚装饰 */}
       <div className="fixed bottom-0 left-0 right-0 h-[2px] bg-cyan-500/20 pointer-events-none" />

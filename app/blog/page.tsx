@@ -267,7 +267,25 @@ export default function BlogPage() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-[#E0E0E0] font-mono selection:bg-cyan-500/30">
-      <aside className="fixed left-0 top-0 bottom-0 w-16 border-r border-[#1A1A1A] bg-[#0A0A0A] flex flex-col items-center py-8 z-50">
+      <div className="md:hidden sticky top-0 z-40 border-b border-[#1A1A1A] bg-[#0A0A0A]/95 backdrop-blur-md px-4 py-3">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-cyan-500">
+            <Zap size={22} />
+          </Link>
+          <div className="text-[11px] text-gray-400 uppercase tracking-widest">Mark 博客</div>
+          {user ? (
+            <button onClick={() => setShowModal(true)} className="text-cyan-400">
+              <Plus size={20} />
+            </button>
+          ) : (
+            <button onClick={() => setShowLoginModal(true)} className="text-gray-400">
+              <LogIn size={20} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-16 border-r border-[#1A1A1A] bg-[#0A0A0A] flex-col items-center py-8 z-50">
         <Link href="/" className="mb-12 text-cyan-500 animate-pulse">
           <Zap size={32} />
         </Link>
@@ -307,14 +325,14 @@ export default function BlogPage() {
         </div>
       </aside>
 
-      <section className="pl-16 p-8">
-        <header className="flex justify-between items-end mb-12">
+      <section className="px-4 pb-24 pt-4 md:pl-16 md:p-8 md:pb-8">
+        <header className="flex flex-col gap-4 md:flex-row md:justify-between md:items-end mb-8 md:mb-12">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-white flex items-center gap-2">
+            <h1 className="text-2xl md:text-4xl font-black tracking-tighter text-white flex items-center gap-2">
               <span className="bg-cyan-500 text-black px-2 py-0.5 uppercase">Mark</span>
               Web3 研究终端
               {user && (
-                <span className="ml-2 px-2 py-0.5 border border-cyan-500 text-cyan-500 text-[10px] animate-pulse">
+                <span className="ml-1 md:ml-2 px-2 py-0.5 border border-cyan-500 text-cyan-500 text-[9px] md:text-[10px] animate-pulse">
                   管理者模式
                 </span>
               )}
@@ -323,7 +341,7 @@ export default function BlogPage() {
               Markdown 发布 // 全文检索 // 草稿自动保存
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             {user ? (
               <>
                 <button
@@ -399,14 +417,14 @@ export default function BlogPage() {
                   <article
                     id={`post-${post.id}`}
                     key={post.id}
-                    className="group relative border border-[#1A1A1A] bg-[#0A0A0A] p-6 rounded-sm hover:border-cyan-500/50 transition-all duration-500"
+                  className="group relative border border-[#1A1A1A] bg-[#0A0A0A] p-4 md:p-6 rounded-sm hover:border-cyan-500/50 transition-all duration-500"
                   >
                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-800 group-hover:border-cyan-500 transition-colors" />
                     <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-gray-800 group-hover:border-cyan-500 transition-colors" />
                     <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-b border-l border-gray-800 group-hover:border-cyan-500 transition-colors" />
                     <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-800 group-hover:border-cyan-500 transition-colors" />
 
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start gap-3 mb-4">
                       <div className="flex flex-wrap items-center gap-3 text-[10px] text-gray-500 uppercase tracking-widest font-mono">
                         <span className="flex items-center gap-1">
                           <Calendar size={12} />
@@ -441,7 +459,7 @@ export default function BlogPage() {
                       </div>
                     </div>
 
-                    <h2 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors line-clamp-2">
+                    <h2 className="text-lg md:text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors line-clamp-2">
                       {post.title}
                     </h2>
 
@@ -481,7 +499,7 @@ export default function BlogPage() {
             )}
           </div>
 
-          <div className="col-span-12 lg:col-span-4 space-y-8">
+          <div className="col-span-12 lg:col-span-4 space-y-6 md:space-y-8">
             <div className="relative group">
               <input
                 type="text"
@@ -493,7 +511,7 @@ export default function BlogPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-cyan-500 transition-colors" size={16} />
             </div>
 
-            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-6 rounded-sm">
+            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 md:p-6 rounded-sm">
               <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Activity size={14} className="text-cyan-500" />
                 终端数据
@@ -514,7 +532,7 @@ export default function BlogPage() {
               </div>
             </div>
 
-            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-6 rounded-sm">
+            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 md:p-6 rounded-sm">
               <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Filter size={14} className="text-cyan-500" />
                 分类筛选
@@ -541,15 +559,15 @@ export default function BlogPage() {
       </section>
 
       {selectedPost && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className="w-full max-w-4xl max-h-[90vh] bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl overflow-y-auto custom-scrollbar animate-in fade-in zoom-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4 bg-black/90 backdrop-blur-md">
+          <div className="w-full max-w-4xl max-h-[92vh] bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl overflow-y-auto custom-scrollbar animate-in fade-in zoom-in duration-300">
             <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-cyan-500" />
             <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-cyan-500" />
             <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-cyan-500" />
             <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-cyan-500" />
 
-            <div className="p-8 md:p-12">
-              <div className="flex justify-between items-center mb-10">
+            <div className="p-4 md:p-12">
+              <div className="flex justify-between items-center mb-6 md:mb-10">
                 <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-500 uppercase tracking-widest font-mono">
                   <span className="flex items-center gap-1">
                     <Calendar size={12} />
@@ -572,7 +590,7 @@ export default function BlogPage() {
                 </button>
               </div>
 
-              <h1 className="text-3xl md:text-5xl font-black text-white mb-8 tracking-tighter leading-tight">
+              <h1 className="text-2xl md:text-5xl font-black text-white mb-6 md:mb-8 tracking-tighter leading-tight">
                 {selectedPost.title}
               </h1>
 
@@ -605,14 +623,14 @@ export default function BlogPage() {
       )}
 
       {showLoginModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 md:p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-md bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl animate-in fade-in zoom-in duration-300">
             <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-500" />
             <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-500" />
             <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-500" />
             <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-cyan-500" />
 
-            <div className="p-8">
+            <div className="p-5 md:p-8">
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-xl font-bold text-white uppercase tracking-tighter flex items-center gap-2">
                   <Key size={20} className="text-cyan-500" />
@@ -679,16 +697,16 @@ export default function BlogPage() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-4xl bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl animate-in fade-in zoom-in duration-300">
             <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-500" />
             <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-500" />
             <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-500" />
             <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-cyan-500" />
 
-            <div className="p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-xl font-bold text-white uppercase tracking-tighter flex items-center gap-2">
+            <div className="p-4 md:p-8">
+              <div className="flex justify-between items-center mb-6 md:mb-8">
+                <h2 className="text-sm md:text-xl font-bold text-white uppercase tracking-tighter flex items-center gap-2">
                   <Send size={20} className="text-cyan-500" />
                   Markdown 研究见解编辑器
                 </h2>
@@ -715,7 +733,7 @@ export default function BlogPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-mono">
                       研究领域 // CATEGORY
@@ -798,7 +816,7 @@ export default function BlogPage() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-gray-500 uppercase tracking-widest">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between text-[10px] text-gray-500 uppercase tracking-widest">
                   <div className="flex items-center gap-4">
                     <span className="flex items-center gap-1"><Clock size={12} />预计阅读 {markdownPreview.minutes} 分钟</span>
                     <span className="flex items-center gap-1"><FileText size={12} />{markdownPreview.words} 词</span>
@@ -808,7 +826,7 @@ export default function BlogPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end pt-2 md:pt-4">
                   <button
                     disabled={isPublishing}
                     type="submit"
@@ -832,6 +850,30 @@ export default function BlogPage() {
           </div>
         </div>
       )}
+
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[#1A1A1A] bg-[#0A0A0A]/95 backdrop-blur-md px-2 py-2">
+        <div className="grid grid-cols-4 gap-1">
+          <Link href="/" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
+            <Zap size={16} />
+            首页
+          </Link>
+          <Link href="/dashboard" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400">
+            <Activity size={16} />
+            K线
+          </Link>
+          <Link href="/blog" className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-cyan-400">
+            <FileText size={16} />
+            博客
+          </Link>
+          <button
+            onClick={() => (user ? setShowModal(true) : setShowLoginModal(true))}
+            className="flex flex-col items-center gap-1 py-1 text-[10px] uppercase text-gray-500 hover:text-cyan-400"
+          >
+            {user ? <Plus size={16} /> : <LogIn size={16} />}
+            {user ? '发布' : '登录'}
+          </button>
+        </div>
+      </nav>
 
       <style jsx global>{`
         @keyframes shimmer {
