@@ -60,6 +60,7 @@ export default function BlogPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -177,28 +178,61 @@ export default function BlogPage() {
     }
     setIsPublishing(true);
     try {
-      const { error } = await supabase.from('posts').insert([
-        {
-          title: newPost.title.trim(),
-          content: newPost.content,
-          category: newPost.category,
-          tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
-          author: 'Mark'
-        }
-      ]);
-      if (error) throw error;
+      if (editingPostId) {
+        // 更新现有文章
+        const { error } = await supabase
+          .from('posts')
+          .update({
+            title: newPost.title.trim(),
+            content: newPost.content,
+            category: newPost.category,
+            tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingPostId);
+
+        if (error) throw error;
+      } else {
+        // 创建新文章
+        const { error } = await supabase.from('posts').insert([
+          {
+            title: newPost.title.trim(),
+            content: newPost.content,
+            category: newPost.category,
+            tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
+            author: 'Mark'
+          }
+        ]);
+        if (error) throw error;
+      }
+
       setNewPost(defaultNewPost);
+      setEditingPostId(null);
       setIsPreviewMode(false);
       setShowModal(false);
       setDraftSavedAt('');
-      if (typeof window !== 'undefined') window.localStorage.removeItem(DRAFT_KEY);
+      if (typeof window !== 'undefined' && !editingPostId) {
+        window.localStorage.removeItem(DRAFT_KEY);
+      }
       await fetchPosts();
     } catch (err) {
-      console.error('Error publishing post:', err);
-      alert('发布失败，请检查数据库配置或网络');
+      console.error('Error publishing/updating post:', err);
+      alert(editingPostId ? '修改失败，请检查数据库配置或网络' : '发布失败，请检查数据库配置或网络');
     } finally {
       setIsPublishing(false);
     }
+  };
+
+  const handleEdit = (post: BlogPost) => {
+    setNewPost({
+      title: post.title,
+      content: post.content,
+      category: post.category,
+      tags: Array.isArray(post.tags) ? post.tags.join(', ') : ''
+    });
+    setEditingPostId(post.id);
+    setShowModal(true);
+    setSelectedPost(null); // 如果是从详情页点编辑，先关掉详情
   };
 
   const handleDelete = async (id: string) => {
@@ -452,16 +486,27 @@ export default function BlogPage() {
                         <button
                           onClick={() => handleCopyLink(post.id)}
                           className="text-gray-600 hover:text-cyan-400 transition-colors"
+                          title="复制链接"
                         >
                           <Copy size={14} />
                         </button>
                         {user && (
-                          <button
-                            onClick={() => handleDelete(post.id)}
-                            className="text-gray-600 hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleEdit(post)}
+                              className="text-gray-600 hover:text-cyan-400 transition-colors"
+                              title="编辑文章"
+                            >
+                              <PencilLine size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(post.id)}
+                              className="text-gray-600 hover:text-red-500 transition-colors"
+                              title="删除文章"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -574,7 +619,7 @@ export default function BlogPage() {
             <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-cyan-500" />
 
             <div className="p-4 md:p-12">
-              <div className="flex justify-between items-center mb-6 md:mb-10">
+              <div className="sticky top-0 bg-[#0A0A0A] z-20 pb-4 mb-6 md:mb-10 flex justify-between items-center border-b border-[#1A1A1A]">
                 <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-500 uppercase tracking-widest font-mono">
                   <span className="flex items-center gap-1">
                     <Calendar size={12} />
@@ -593,13 +638,24 @@ export default function BlogPage() {
                   className="flex items-center gap-2 text-[10px] text-gray-500 hover:text-white uppercase tracking-widest font-bold transition-colors group"
                 >
                   <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                  返回控制台
+                  返回
                 </button>
               </div>
 
-              <h1 className="text-2xl md:text-5xl font-black text-white mb-6 md:mb-8 tracking-tighter leading-tight">
-                {selectedPost.title}
-              </h1>
+              <div className="flex justify-between items-start mb-6 md:mb-8">
+                <h1 className="text-2xl md:text-5xl font-black text-white tracking-tighter leading-tight flex-1">
+                  {selectedPost.title}
+                </h1>
+                {user && (
+                  <button
+                    onClick={() => handleEdit(selectedPost)}
+                    className="ml-4 p-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500 hover:text-black transition-all rounded-sm"
+                    title="编辑此文章"
+                  >
+                    <PencilLine size={20} />
+                  </button>
+                )}
+              </div>
 
               <div className="flex items-center gap-3 mb-12 pb-8 border-b border-[#1A1A1A]">
                 <div className="w-10 h-10 rounded-full bg-cyan-500 text-black flex items-center justify-center text-sm font-black">
@@ -631,7 +687,8 @@ export default function BlogPage() {
 
       {showLoginModal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 md:p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="w-full max-w-md max-h-[90vh] bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl overflow-y-auto custom-scrollbar animate-in fade-in zoom-in duration-300">
+            {/* 角部装饰 */}
             <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-500" />
             <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-500" />
             <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-500" />
@@ -705,20 +762,25 @@ export default function BlogPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-4xl bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl animate-in fade-in zoom-in duration-300">
-            <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-500" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-500" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-500" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-cyan-500" />
+          <div className="w-full max-w-4xl max-h-[95vh] bg-[#0A0A0A] border border-[#1A1A1A] relative shadow-2xl overflow-y-auto custom-scrollbar animate-in fade-in zoom-in duration-300">
+            {/* 角部装饰 */}
+            <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-500 z-10" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-500 z-10" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-500 z-10" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-cyan-500 z-10" />
 
             <div className="p-4 md:p-8">
-              <div className="flex justify-between items-center mb-6 md:mb-8">
+              <div className="sticky top-0 bg-[#0A0A0A] z-20 pb-4 mb-6 md:mb-8 flex justify-between items-center border-b border-[#1A1A1A]">
                 <h2 className="text-sm md:text-xl font-bold text-white uppercase tracking-tighter flex items-center gap-2">
                   <Send size={20} className="text-cyan-500" />
-                  Markdown 研究见解编辑器
+                  {editingPostId ? '修改研究见解' : 'Markdown 研究见解编辑器'}
                 </h2>
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingPostId(null);
+                    setNewPost(defaultNewPost);
+                  }}
                   className="text-gray-500 hover:text-white transition-colors"
                 >
                   <ArrowLeft size={20} />
@@ -833,7 +895,7 @@ export default function BlogPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2 md:pt-4">
+                <div className="flex justify-end pt-2 md:pt-4 pb-8">
                   <button
                     disabled={isPublishing}
                     type="submit"
@@ -842,11 +904,11 @@ export default function BlogPage() {
                     {isPublishing ? (
                       <>
                         <Loader2 size={16} className="animate-spin" />
-                        正在发布...
+                        {editingPostId ? '正在保存...' : '正在发布...'}
                       </>
                     ) : (
                       <>
-                        确认发布见解
+                        {editingPostId ? '确认修改并同步' : '确认发布见解'}
                         <Send size={16} />
                       </>
                     )}
