@@ -65,6 +65,7 @@ export default function BlogPage() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
+  const [activeArchive, setActiveArchive] = useState<string | null>(null);
   const [draftSavedAt, setDraftSavedAt] = useState('');
   const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
 
@@ -278,6 +279,22 @@ export default function BlogPage() {
     return ['全部', ...Array.from(new Set([...CATEGORY_OPTIONS, ...dynamicCategories]))];
   }, [posts]);
 
+  const archives = useMemo(() => {
+    const archiveMap: Record<string, number> = {};
+    posts.forEach((post) => {
+      const date = new Date(post.created_at);
+      const label = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+      archiveMap[label] = (archiveMap[label] || 0) + 1;
+    });
+    return Object.entries(archiveMap)
+      .sort((a, b) => {
+        const [yearA, monthA] = a[0].split(/[年月]/).map(Number);
+        const [yearB, monthB] = b[0].split(/[年月]/).map(Number);
+        return yearB !== yearA ? yearB - yearA : monthB - monthA;
+      })
+      .map(([label, count]) => ({ label, count }));
+  }, [posts]);
+
   const filteredPosts = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();
     return posts.filter((post) => {
@@ -285,9 +302,17 @@ export default function BlogPage() {
       const plain = getTextFromMarkdown(post.content || '');
       const hitKeyword = !keyword || [post.title, plain, post.category, tags.join(' ')].join(' ').toLowerCase().includes(keyword);
       const hitCategory = activeCategory === '全部' || post.category === activeCategory;
-      return hitKeyword && hitCategory;
+
+      let hitArchive = true;
+      if (activeArchive) {
+        const date = new Date(post.created_at);
+        const label = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+        hitArchive = label === activeArchive;
+      }
+
+      return hitKeyword && hitCategory && hitArchive;
     });
-  }, [posts, searchText, activeCategory]);
+  }, [posts, searchText, activeCategory, activeArchive]);
 
   const markdownPreview = useMemo(() => {
     const text = getTextFromMarkdown(newPost.content);
@@ -593,15 +618,60 @@ export default function BlogPage() {
                 {categories.map((cat) => (
                   <button
                     key={cat}
-                    onClick={() => setActiveCategory(cat)}
+                    onClick={() => {
+                      setActiveCategory(cat);
+                      setActiveArchive(null);
+                    }}
                     className={cn(
                       "px-2 py-1 border text-[10px] uppercase tracking-widest transition-colors cursor-pointer",
-                      activeCategory === cat
+                      activeCategory === cat && !activeArchive
                         ? "bg-cyan-500/15 border-cyan-500 text-cyan-400"
                         : "bg-[#151515] border-[#222] text-gray-500 hover:border-cyan-500/30 hover:text-cyan-400"
                     )}
                   >
                     {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 md:p-6 rounded-sm">
+              <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                <Calendar size={14} className="text-cyan-500" />
+                时间归档
+              </h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setActiveArchive(null);
+                    setActiveCategory('全部');
+                  }}
+                  className={cn(
+                    "w-full flex justify-between items-center px-3 py-2 text-[10px] uppercase tracking-widest transition-colors border",
+                    !activeArchive && activeCategory === '全部'
+                      ? "bg-cyan-500/15 border-cyan-500 text-cyan-400"
+                      : "bg-[#151515] border-[#222] text-gray-500 hover:border-cyan-500/30 hover:text-cyan-400"
+                  )}
+                >
+                  <span>全部文章</span>
+                  <span className="font-mono">{posts.length}</span>
+                </button>
+                {archives.map((archive) => (
+                  <button
+                    key={archive.label}
+                    onClick={() => {
+                      setActiveArchive(archive.label);
+                      setActiveCategory('全部');
+                    }}
+                    className={cn(
+                      "w-full flex justify-between items-center px-3 py-2 text-[10px] uppercase tracking-widest transition-colors border",
+                      activeArchive === archive.label
+                        ? "bg-cyan-500/15 border-cyan-500 text-cyan-400"
+                        : "bg-[#151515] border-[#222] text-gray-500 hover:border-cyan-500/30 hover:text-cyan-400"
+                    )}
+                  >
+                    <span>{archive.label}</span>
+                    <span className="font-mono">{archive.count}</span>
                   </button>
                 ))}
               </div>
