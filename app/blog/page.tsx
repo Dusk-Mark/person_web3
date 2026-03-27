@@ -66,8 +66,10 @@ export default function BlogPage() {
   const [searchText, setSearchText] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
   const [activeArchive, setActiveArchive] = useState<string | null>(null);
+  const [filterDate, setFilterDate] = useState('');
   const [draftSavedAt, setDraftSavedAt] = useState('');
   const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState('');
 
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -179,32 +181,51 @@ export default function BlogPage() {
     }
     setIsPublishing(true);
     try {
+      const postData = {
+        title: newPost.title.trim(),
+        content: newPost.content,
+        category: newPost.category,
+        tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
+        updated_at: new Date().toISOString()
+      };
+
       if (editingPostId) {
         // 更新现有文章
-        const { error } = await supabase
+        const { data, error, count } = await supabase
           .from('posts')
-          .update({
-            title: newPost.title.trim(),
-            content: newPost.content,
-            category: newPost.category,
-            tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingPostId);
+          .update(postData)
+          .eq('id', editingPostId)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase update error:', error);
+          throw error;
+        }
+        
+        console.log('Post updated successfully. Rows affected:', count, 'Data returned:', data);
+        
+        if (!data || data.length === 0) {
+          console.warn('Update executed but no data returned. Check if ID exists or RLS policies.');
+          alert('修改未能应用到数据库，请检查权限或刷新页面重试');
+          return;
+        }
+        
+        // 关键修复：手动更新本地 posts 状态中的对应文章，确保 UI 立即反映修改
+        setPosts(prevPosts => prevPosts.map(p => 
+          p.id === editingPostId ? { ...p, ...data[0] } : p
+        ));
       } else {
         // 创建新文章
-        const { error } = await supabase.from('posts').insert([
+        const { data, error } = await supabase.from('posts').insert([
           {
-            title: newPost.title.trim(),
-            content: newPost.content,
-            category: newPost.category,
-            tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
+            ...postData,
             author: 'Mark'
           }
-        ]);
+        ]).select();
+        
         if (error) throw error;
+        // 如果是新建，fetchPosts 仍然是最稳妥的
+        await fetchPosts();
       }
 
       setNewPost(defaultNewPost);
@@ -212,6 +233,9 @@ export default function BlogPage() {
       setIsPreviewMode(false);
       setShowModal(false);
       setDraftSavedAt('');
+      setSuccessMsg(editingPostId ? '文章修改成功！' : '文章发布成功！');
+      setTimeout(() => setSuccessMsg(''), 3000);
+
       if (typeof window !== 'undefined' && !editingPostId) {
         window.localStorage.removeItem(DRAFT_KEY);
       }
@@ -310,9 +334,15 @@ export default function BlogPage() {
         hitArchive = label === activeArchive;
       }
 
-      return hitKeyword && hitCategory && hitArchive;
+      let hitDate = true;
+      if (filterDate) {
+        const date = new Date(post.created_at).toISOString().split('T')[0];
+        hitDate = date === filterDate;
+      }
+
+      return hitKeyword && hitCategory && hitArchive && hitDate;
     });
-  }, [posts, searchText, activeCategory, activeArchive]);
+  }, [posts, searchText, activeCategory, activeArchive, filterDate]);
 
   const markdownPreview = useMemo(() => {
     const text = getTextFromMarkdown(newPost.content);
@@ -406,6 +436,11 @@ export default function BlogPage() {
             <p className="text-gray-500 mt-2 text-xs uppercase tracking-widest">
               Markdown 发布 // 全文检索 // 草稿自动保存
             </p>
+            {successMsg && (
+              <div className="mt-4 px-4 py-2 bg-cyan-500/20 border border-cyan-500 text-cyan-400 text-xs font-bold animate-in fade-in slide-in-from-top-2 duration-300">
+                {successMsg}
+              </div>
+            )}
           </div>
           <div className="hidden md:flex items-center gap-4">
             {user ? (
@@ -439,6 +474,19 @@ export default function BlogPage() {
 
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-8 space-y-6">
+            <div className="flex justify-between items-center px-1">
+              <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                {activeArchive || filterDate || activeCategory !== '全部' ? '筛选结果' : '最新报告'} // {filteredPosts.length} 篇
+              </div>
+              <button 
+                onClick={fetchPosts}
+                disabled={loading}
+                className="p-1.5 border border-[#1A1A1A] hover:border-cyan-500/50 text-gray-500 hover:text-cyan-400 transition-all group"
+                title="手动刷新列表"
+              >
+                <Activity size={14} className={cn(loading && "animate-pulse")} />
+              </button>
+            </div>
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 border border-[#1A1A1A] bg-[#0A0A0A] rounded-sm relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent animate-shimmer" />
@@ -590,6 +638,33 @@ export default function BlogPage() {
 
             <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 md:p-6 rounded-sm">
               <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                <Search size={14} className="text-cyan-500" />
+                日期查找
+              </h3>
+              <div className="space-y-4">
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => {
+                    setFilterDate(e.target.value);
+                    setActiveArchive(null);
+                    setActiveCategory('全部');
+                  }}
+                  className="w-full bg-[#050505] border border-[#1A1A1A] py-2 px-3 text-[10px] text-gray-400 focus:outline-none focus:border-cyan-500/50 uppercase tracking-widest transition-colors custom-date-input"
+                />
+                {filterDate && (
+                  <button
+                    onClick={() => setFilterDate('')}
+                    className="w-full py-1 border border-red-500/30 text-red-500/70 text-[9px] uppercase tracking-widest hover:bg-red-500/10 transition-colors"
+                  >
+                    重置日期筛选
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 md:p-6 rounded-sm">
+              <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Activity size={14} className="text-cyan-500" />
                 终端数据
               </h3>
@@ -737,7 +812,7 @@ export default function BlogPage() {
                 </div>
               </div>
 
-              <div className="prose prose-invert max-w-none prose-headings:text-white prose-strong:text-cyan-300 prose-a:text-cyan-400 prose-code:text-cyan-300 prose-pre:bg-[#050505] prose-blockquote:border-cyan-500 prose-blockquote:text-gray-300">
+              <div className="prose prose-invert max-w-none prose-headings:text-white prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-cyan-400 prose-a:text-cyan-400 prose-a:no-underline hover:prose-a:underline prose-code:text-cyan-300 prose-code:bg-cyan-500/10 prose-code:px-1 prose-code:rounded prose-pre:bg-[#050505] prose-pre:border prose-pre:border-[#1A1A1A] prose-blockquote:border-l-4 prose-blockquote:border-cyan-500 prose-blockquote:bg-cyan-500/5 prose-blockquote:py-1 prose-blockquote:px-4 prose-li:text-gray-300">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {selectedPost.content || ''}
                 </ReactMarkdown>
@@ -937,7 +1012,7 @@ export default function BlogPage() {
                     核心内容 // CONTENT BODY (支持 Markdown)
                   </label>
                   {isPreviewMode ? (
-                    <div className="min-h-[320px] border border-[#1A1A1A] bg-[#050505] p-4 prose prose-invert max-w-none prose-headings:text-white prose-strong:text-cyan-300 prose-a:text-cyan-400 prose-code:text-cyan-300 prose-pre:bg-[#080808] prose-blockquote:border-cyan-500 prose-blockquote:text-gray-300">
+                    <div className="min-h-[320px] border border-[#1A1A1A] bg-[#050505] p-4 prose prose-invert max-w-none prose-headings:text-white prose-headings:font-bold prose-p:text-gray-300 prose-strong:text-cyan-400 prose-a:text-cyan-400 prose-code:text-cyan-300 prose-code:bg-cyan-500/10 prose-pre:bg-[#080808] prose-blockquote:border-cyan-500 prose-li:text-gray-300">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {newPost.content || '请输入 Markdown 正文内容...'}
                       </ReactMarkdown>
@@ -1025,6 +1100,10 @@ export default function BlogPage() {
         }
         .animate-shimmer {
           animation: shimmer 2s infinite;
+        }
+        .custom-date-input::-webkit-calendar-picker-indicator {
+          filter: invert(1) sepia(100%) saturate(500%) hue-rotate(140deg);
+          cursor: pointer;
         }
       `}</style>
     </main>
