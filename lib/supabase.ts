@@ -24,4 +24,5 @@ export type BlogPost = {
   updated_at: string;
   category: string;
   tags: string[];
+  is_pinned?: boolean;
 };

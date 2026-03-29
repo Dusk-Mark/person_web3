@@ -7,7 +7,7 @@ import {
   Zap, Activity, Map, LayoutDashboard, Settings, Bell,
   FileText, Plus, Search, Calendar, Tag, ChevronRight,
   ArrowLeft, Send, Loader2, Trash2, LogIn, LogOut, Key,
-  Filter, Copy, Clock, Eye, PencilLine, List, Heading2, Link2, Code2, Calculator
+  Filter, Copy, Clock, Eye, PencilLine, List, Heading2, Link2, Code2, Calculator, Pin
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase, BlogPost } from '@/lib/supabase';
@@ -25,13 +25,15 @@ type NewPostForm = {
   content: string;
   category: string;
   tags: string;
+  is_pinned: boolean;
 };
 
 const defaultNewPost: NewPostForm = {
   title: '',
   content: '',
   category: '行情分析',
-  tags: ''
+  tags: '',
+  is_pinned: false
 };
 
 const formatTime = (value: string) =>
@@ -158,6 +160,7 @@ export default function BlogPage() {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
+        .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -186,7 +189,8 @@ export default function BlogPage() {
         content: newPost.content,
         category: newPost.category,
         tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        is_pinned: newPost.is_pinned
       };
 
       if (editingPostId) {
@@ -253,7 +257,8 @@ export default function BlogPage() {
       title: post.title,
       content: post.content,
       category: post.category,
-      tags: Array.isArray(post.tags) ? post.tags.join(', ') : ''
+      tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
+      is_pinned: !!post.is_pinned
     });
     setEditingPostId(post.id);
     setShowModal(true);
@@ -268,6 +273,36 @@ export default function BlogPage() {
       await fetchPosts();
     } catch (err) {
       console.error('Error deleting post:', err);
+    }
+  };
+
+  const handleTogglePin = async (post: BlogPost) => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .update({ is_pinned: !post.is_pinned })
+        .eq('id', post.id)
+        .select();
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setPosts(prevPosts => {
+          const updatedPosts = prevPosts.map(p => 
+            p.id === post.id ? { ...p, ...data[0] } : p
+          );
+          // 重新排序：置顶优先，其次按创建时间
+          return updatedPosts.sort((a, b) => {
+            if (a.is_pinned !== b.is_pinned) {
+              return a.is_pinned ? -1 : 1;
+            }
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
+        });
+      }
+    } catch (err) {
+      console.error('Error toggling pin status:', err);
+      alert('操作失败，请重试');
     }
   };
 
@@ -540,6 +575,12 @@ export default function BlogPage() {
 
                     <div className="flex justify-between items-start gap-3 mb-4">
                       <div className="flex flex-wrap items-center gap-3 text-[10px] text-gray-500 uppercase tracking-widest font-mono">
+                        {post.is_pinned && (
+                          <span className="flex items-center gap-1 text-cyan-400 font-bold bg-cyan-400/10 px-1.5 py-0.5 border border-cyan-400/30">
+                            <Pin size={10} className="fill-cyan-400" />
+                            置顶
+                          </span>
+                        )}
                         <span className="flex items-center gap-1">
                           <Calendar size={12} />
                           {formatTime(post.created_at)}
@@ -565,6 +606,16 @@ export default function BlogPage() {
                         </button>
                         {user && (
                           <>
+                            <button
+                              onClick={() => handleTogglePin(post)}
+                              className={cn(
+                                "transition-colors",
+                                post.is_pinned ? "text-cyan-400" : "text-gray-600 hover:text-cyan-400"
+                              )}
+                              title={post.is_pinned ? "取消置顶" : "置顶文章"}
+                            >
+                              <Pin size={14} className={cn(post.is_pinned && "fill-cyan-400")} />
+                            </button>
                             <button
                               onClick={() => handleEdit(post)}
                               className="text-gray-600 hover:text-cyan-400 transition-colors"
@@ -947,7 +998,7 @@ export default function BlogPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-mono">
                       研究领域 // CATEGORY
@@ -973,6 +1024,24 @@ export default function BlogPage() {
                       placeholder="BTC, 行情, 分析..."
                       className="w-full bg-[#050505] border border-[#1A1A1A] py-3 px-4 text-sm focus:outline-none focus:border-cyan-500/50 text-white"
                     />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-mono">
+                      文章置顶 // PINNED
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setNewPost({ ...newPost, is_pinned: !newPost.is_pinned })}
+                      className={cn(
+                        "w-full py-3 px-4 border text-xs font-bold uppercase transition-all duration-300 flex items-center justify-center gap-2",
+                        newPost.is_pinned 
+                          ? "bg-cyan-500/20 border-cyan-500 text-cyan-400" 
+                          : "bg-[#050505] border-[#1A1A1A] text-gray-500 hover:border-cyan-500/50"
+                      )}
+                    >
+                      <Pin size={14} className={cn(newPost.is_pinned && "fill-cyan-400")} />
+                      {newPost.is_pinned ? '已开启置顶' : '未置顶'}
+                    </button>
                   </div>
                 </div>
 
